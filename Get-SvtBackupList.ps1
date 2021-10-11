@@ -10,6 +10,7 @@ Params:
 
 .EXAMPLE
 ./Get-SvtBackupList.ps1 -VaIP "192.168.1.1" | Display the backups on screen
+./Get-SvtBackupList.ps1 -VaIP "192.168.1.1" -Output | Writes the output of the scipt
 
 .NOTES
 Author: Shay Hosking
@@ -21,7 +22,10 @@ https://github.com/DefaultDrop/SimplivityScripts
 
 Param(
     [Parameter(Mandatory = $true)]
-    [string]$VaIP
+    [string]$VaIP,
+
+    [Parameter()]
+    [switch]$Output = $False
 )
 
 # Connect to Simplivity
@@ -32,25 +36,27 @@ try{
     Write-Host "Looking for Failed Backups"
     $BackupsFailed = Get-SvtBackup -BackupState FAILED -ErrorAction Stop | Group-Object VmName | Select-Object Count, Name | Out-String
     Write-Host "Found Failed Backups" -ForegroundColor Red
-    #Write-Output $BackupsFailed
+    Write-Host $BackupsFailed
 }
 catch {
     $BackupsFailed = $_.Exception.Message
-    #Write-Output "Failed Backups: $_"
+    Write-Host "Failed Backups: $_"
 }
 
 # Get the count of backups by VM for the last 24 hours
 try {
     Write-Host "Looking for successful backups"
     $BackupCount = Get-SvtBackup -ErrorAction Stop | Group-Object VmName | Select-Object Count, Name | Out-String
-    #$BackupCount = Get-SvtBackup -ErrorAction Stop | Group-Object VmName | Select-Object {Count+"<br />"}, {@Name+"<br />"}
     Write-Host "Count of backups by VM"
-    #Write-Output $BackupCount
+    Write-Host $BackupCount
 }
 catch {
     Write-Host "Error generating successul backup list" -ForegroundColor Red
     $BackupCount = $_.Exception.Message
-    #Write-Output $BackupCount -ForegroundColor Red
+    Write-Host $BackupCount -ForegroundColor Red
 }
 
-Write-Output "<b>Failed Backups:</b> $BackupsFailed<br /><b>Backup Count</b><br />$BackupCount"
+# If the parameter is set, write-output. Useful if this script is called by another script
+if ($Output) {
+    Write-Output "<b>Failed Backups:</b><br />$BackupsFailed<br /><b>Backup Count:</b><br />$BackupCount"
+}

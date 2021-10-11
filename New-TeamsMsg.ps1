@@ -1,14 +1,17 @@
 <#
 
 .SYNOPSIS
-
+This script post a message to Teams via a webhook
 
 .DESCRIPTION
 Params:
+    -Webhook    -Webhook URI
+    -Message    -Message to post
 
 
 .EXAMPLE
-
+.\New-TeamsMsg.ps1 -Webhook https://webhook.com/651e54 -Message "Test Message"
+    Posts the message "Test Message" to the webhook at "https://webhook.com/651e54"
 
 .NOTES
 Author: Shay Hosking
@@ -29,7 +32,7 @@ Param(
 # Convert $Message to json text
 $json = @"
 {
-    "Text": "$Message",
+    "Text": "<br />$Message",
 }
 "@
 
